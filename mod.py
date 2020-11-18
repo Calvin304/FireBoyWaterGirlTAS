@@ -53,7 +53,6 @@ class TasLevelParser:
                         self.set_frame(cur_frame_index + i, self.__PARSE_MAP[parts[0]][parts[1]])
 
     def to_asm(self):
-        # new Array(new Array(0,0,0,0,0,0), new Array(0,0,0,0,0,0,0), ...)
         ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'
         for frame in reversed(self.sequence):
             ret += 'findpropstrict QName(PackageNamespace(""), "Array")\n'
@@ -64,7 +63,7 @@ class TasLevelParser:
         ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(self.sequence)) + "\n"
         return ret
 
-class SwfModifier:
+class SwfModder:
     __PATH_TMP = "tmp"
     __PATH_TAS = "tas"
 
@@ -74,6 +73,7 @@ class SwfModifier:
 
         self._swf_name = os.path.splitext(self._swf_path)[0]
         self._tmp_swf_path = os.path.join(self.__PATH_TMP, self._swf_name + ".swf")
+        self._abc_path = os.path.join(self.__PATH_TMP, self._swf_name + "-0")
 
     def disassemble(self):
         os.makedirs(self.__PATH_TMP, exist_ok=True)  # make tmp dir
@@ -81,13 +81,48 @@ class SwfModifier:
         subprocess.run(["abcexport", os.path.abspath(self._tmp_swf_path)])  # abcexport
         subprocess.run(["rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc"))])
 
+    def mod_inputs(self):
+        level_class_path = os.path.join(self._abc_path, "level.class.asasm")
+        with open(level_class_path, "r") as f:
+            with open(level_class_path+".mod", "w") as g:
+                flags = 0
+                ignoring = False
+                for line in f:
+                    if flags == 3:
+                        g.write("BRUH")
+                        ignoring = True
+                    if flags == -3:
+                        ignoring = False
+
+                    if line.lstrip().startswith("pushdouble") and line.rstrip().endswith("0.0384615384615385"):
+                        flags += 1
+                    elif flags > 0 and line.strip() == "convert_d":
+                        flags += 1
+                    elif flags > 0 and line.lstrip().startswith("setproperty") and line.rstrip().endswith('QName(PackageNamespace(""), "m_timeStep")'):
+                        flags += 1
+                    elif ignoring and line.lstrip().startswith("constructprop") and line.rstrip().endswith('QName(PackageNamespace(""), "Array"), 23'):
+                        flags -= 1
+                    elif ignoring and flags < 0 and line.lstrip().startswith("constructprop") and line.rstrip().endswith('QName(PackageNamespace(""), "Array"), 2'):
+                        flags -= 1
+                    elif ignoring and flags < 0 and line.lstrip().startswith("setproperty") and line.rstrip().endswith('QName(PackageInternalNs(""), "pzPuzzleInputs")'):
+                        flags -= 1
+                    else:
+                        flags = 0
+
+                    if not ignoring:
+                        g.write(line)
 
     def reassemble(self):
         subprocess.run(["rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm"))])
-        subprocess.run(["abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.abc"))])
+        subprocess.run(["abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc"))])
         shutil.move(self._tmp_swf_path, self._output_swf_path)
         shutil.rmtree(self.__PATH_TMP)
 
-m = SwfModifier("fbwg-base.swf", "fbwg-tas.swf")
-m.disassemble()
-m.reassemble()
+    def launch(self):
+        subprocess.run(["flashplayer", self._output_swf_path])
+
+m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
+# m.disassemble()
+m.mod_inputs()
+# m.reassemble()
+# m.launch()
