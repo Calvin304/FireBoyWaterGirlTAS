@@ -1,5 +1,8 @@
 #!/bin/env python3
+import os
 import re
+import subprocess
+import shutil
 
 class TasLevelParser:
     __PARSE_MAP = {
@@ -61,8 +64,30 @@ class TasLevelParser:
         ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(self.sequence)) + "\n"
         return ret
 
+class SwfModifier:
+    __PATH_TMP = "tmp"
+    __PATH_TAS = "tas"
 
-t = TasLevelParser("tas/adventure/01.txt")
-t.parse()
-print(t.sequence)
-print(t.to_asm())
+    def __init__(self, swf_path, output_swf_path):
+        self._swf_path = swf_path
+        self._output_swf_path = output_swf_path
+
+        self._swf_name = os.path.splitext(self._swf_path)[0]
+        self._tmp_swf_path = os.path.join(self.__PATH_TMP, self._swf_name + ".swf")
+
+    def disassemble(self):
+        os.makedirs(self.__PATH_TMP, exist_ok=True)  # make tmp dir
+        shutil.copy(self._swf_path, self._tmp_swf_path)  # copy base swf
+        subprocess.run(["abcexport", os.path.abspath(self._tmp_swf_path)])  # abcexport
+        subprocess.run(["rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc"))])
+
+
+    def reassemble(self):
+        subprocess.run(["rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm"))])
+        subprocess.run(["abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.abc"))])
+        shutil.move(self._tmp_swf_path, self._output_swf_path)
+        shutil.rmtree(self.__PATH_TMP)
+
+m = SwfModifier("fbwg-base.swf", "fbwg-tas.swf")
+m.disassemble()
+m.reassemble()
