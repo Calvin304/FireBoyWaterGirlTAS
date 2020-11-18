@@ -1,0 +1,10 @@
+bool controls per frame: up, right, left, up2, right2, left2
+
+new level: StartGame(param1, param2)
+param1: 
+	1=adventure
+	2=puzzle
+	3=speed
+param2: number
+
+first level: (1,1)  (see StartGameBtn)
