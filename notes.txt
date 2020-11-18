@@ -8,3 +8,7 @@ param1:
 param2: number
 
 first level: (1,1)  (see StartGameBtn)
+
+method maxstack: around 200 needed for 100 frames of instruction
+max 32 levels, max lets say 70s per level, 25*6 bytes of data per second
+=> max stack: 32*70*25*6 * 2 = 672000

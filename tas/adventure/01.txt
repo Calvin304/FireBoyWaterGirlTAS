@@ -1,9 +1,3 @@
-0           # on frame 0...
-f u 10      # fireboy hold up for the next 10 frames
-f r 10      # fireboy hold right for the next 10 frames
-w r 05      # watergirl toggle holding r
-
-25          # on frame 25...
-w u 05      # watergirl hold up for the next 5 frames
-
-40
+0
+f r 100
+w r 100

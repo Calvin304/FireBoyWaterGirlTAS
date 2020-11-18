@@ -89,7 +89,19 @@ class SwfModder:
                 ignoring = False
                 for line in f:
                     if flags == 3:
-                        g.write("BRUH")
+
+                        # proof of concept: just setting lvl 1-1
+                        g.write("getlocal0\n")
+                        g.write('findpropstrict QName(PackageNamespace(""), "Array")\n')
+                        g.write('pushnull\n')
+
+                        t = TasLevelParser("tas/adventure/01.txt")
+                        t.parse()
+                        g.write(t.to_asm())
+
+                        g.write('constructprop QName(PackageNamespace(""), "Array"), 2\n')
+                        g.write('setproperty QName(PackageInternalNs(""), "pzAdventureInputs")\n')
+
                         ignoring = True
                     if flags == -3:
                         ignoring = False
@@ -112,6 +124,8 @@ class SwfModder:
                     if not ignoring:
                         g.write(line)
 
+        shutil.move(level_class_path+".mod", level_class_path)  # replace file
+
     def reassemble(self):
         subprocess.run(["rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm"))])
         subprocess.run(["abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc"))])
@@ -122,7 +136,7 @@ class SwfModder:
         subprocess.run(["flashplayer", self._output_swf_path])
 
 m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-# m.disassemble()
+m.disassemble()
 m.mod_inputs()
-# m.reassemble()
-# m.launch()
+m.reassemble()
+m.launch()
