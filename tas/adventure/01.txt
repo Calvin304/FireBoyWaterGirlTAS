@@ -1,3 +1,29 @@
 0
-f r 100
-w r 100
+f r 85      # red move to middle
+
+64
+f u 5
+
+85
+f u 5      # red is at middle -- jump
+f r 30
+
+100
+f r 16
+f u 5
+
+# fireboy has jumped over water at this point
+
+116
+f u 5
+f r 16
+
+# fireboy now on right ledge
+132
+f u 5
+f l 18
+
+# fireboy positioning for green
+
+0
+w r 30
