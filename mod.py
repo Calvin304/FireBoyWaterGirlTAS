@@ -44,13 +44,25 @@ class TasLevelParser:
                 if line.isnumeric():
                     cur_frame_index = int(line)
                     self.get_frame(cur_frame_index)
-                    print()
                 else:
                     parts = re.split(r"\s+", line)
                     for i in range(int(parts[2])):
                         self.set_frame(cur_frame_index + i, self.__PARSE_MAP[parts[0]][parts[1]])
-                    print()
+
+    def to_asm(self):
+        # new Array(new Array(0,0,0,0,0,0), new Array(0,0,0,0,0,0,0), ...)
+        ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'
+        for frame in reversed(self.sequence):
+            ret += 'findpropstrict QName(PackageNamespace(""), "Array")\n'
+            for val in frame:
+                ret += "pushbyte " + str(val) + "\n"
+            ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(frame)) + "\n"
+
+        ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(self.sequence)) + "\n"
+        return ret
+
 
 t = TasLevelParser("tas/adventure/01.txt")
 t.parse()
 print(t.sequence)
+print(t.to_asm())
