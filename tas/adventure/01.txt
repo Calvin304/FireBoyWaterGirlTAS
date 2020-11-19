@@ -30,4 +30,18 @@ f r 85
                                         f r 35  # stand on button
 
 # watergirl position in front of fire
-w r 60
+w r 55
+    # jump over fire
+    w u 5
+    w r 28
+        # walk through water for a bit (just enough to get diamond)
+        w r 12
+            # then jump
+            w u 5
+            w r 24
+                # jump onto ledge
+                w u 5
+                w r 20
+                    # jump onto 2nd level
+                    w u 5
+                    w l 25
