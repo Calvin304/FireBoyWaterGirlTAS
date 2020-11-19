@@ -40,6 +40,35 @@ f r 85
                                                             # jump off platform
                                                             f l 20
                                                             f u 5
+                                                                # move off platform
+                                                                f l 13
+                                                                    # f jump
+                                                                    f u 5
+                                                                    f l 20
+                                                                        # f move left
+                                                                        f l 57
+                                                                            # f jump onto box
+                                                                            f u 5
+                                                                            f l 5
+                                                                                # wait to land on box
+                                                                                s 13
+                                                                                    # jump off box
+                                                                                    f u 5
+                                                                                    f l 20
+                                                                                        # wait for landing
+                                                                                        s 3
+                                                                                            # run up for jump
+                                                                                            f r 17
+                                                                                                # jump onto last platform
+                                                                                                f u 5
+                                                                                                f r 20
+                                                                                                    # move towards diamond
+                                                                                                    f r 49
+                                                                                                        # jump over
+                                                                                                        f u 5
+                                                                                                        f r 22
+                                                                                                            # enter goal
+                                                                                                            s 50
 
 # watergirl position in front of fire
 w r 55
@@ -85,3 +114,21 @@ w r 55
                                                             s 29
                                                                 # move off button
                                                                 w l 30
+                                                                    # move over to box
+                                                                    w l 96 # push over box
+                                                                        # jump onto box
+                                                                        w u 5
+                                                                        w l 10
+                                                                            # land on top of box
+                                                                            s 10
+                                                                                # jump onto ledge
+                                                                                w u 5
+                                                                                w l 19  # collect diamond
+                                                                                    # move right
+                                                                                    w r 20
+                                                                                        # jump onto ledge
+                                                                                        w u 5
+                                                                                        w r 70  # move towards slope
+                                                                                            # jump over slope
+                                                                                            w u 5
+                                                                                            w r 35  # move to exit
