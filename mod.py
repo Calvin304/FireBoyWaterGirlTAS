@@ -52,9 +52,12 @@ class TasLevelParser:
 
                 if indent_n != last_indent_n:
                     if indent_n > last_indent_n:
-                        time_stack.append(time_stack[-1] + cur_max_duration)
+                        push_val = time_stack[-1] + cur_max_duration
+                        while len(time_stack) - 1 < indent_n // 4:
+                            time_stack.append(push_val)
                     elif indent_n < last_indent_n:
-                        time_stack.pop()
+                        while len(time_stack) - 1 > indent_n // 4:
+                            time_stack.pop()
 
                     cur_max_duration = -1
                     last_indent_n = indent_n
@@ -73,6 +76,8 @@ class TasLevelParser:
 
                 if duration > cur_max_duration:
                     cur_max_duration = duration
+
+                print()
 
     def to_asm(self):
         ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'

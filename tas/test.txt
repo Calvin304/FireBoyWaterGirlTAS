@@ -1,10 +1,11 @@
-# eat food
+# fireboy move to middle
 f r 5
-f u 3
-    # jump the bump
-    f u 5
-    f r 2
-        s 4
+    # fireboy jump over water
+    f u 2
+    f r 4
+        # fireboy jump onto right ledge
+        f u 2
+        f r 3
 
-    w u 3
-        w l 5
+# watergirl position in front of fire
+w r 10

@@ -1,88 +1,33 @@
-0
-f r 85      # red move to middle
+# fireboy move to middle
+f r 85
+    # fireboy jump over water
+    f u 5
+    f r 28
+        # fireboy jump onto right ledge
+        f u 5
+        f r 17
+            # f jump onto 2nd level
+            f u 5
+            f l 30  # position in front of green
+                # f jump over green
+                f u 5
+                f l 27
+                    # f jump over ledge
+                    f u 5
+                    f l 25
+                        # f walk up to and push lever
+                        f l 16
+                            # f jump over lever
+                            f u 5
+                            f l 20
+                                # wait for platform to come down
+                                s 4
+                                    # jump onto platform
+                                    f u 5
+                                    f l 10
+                                        # jump off platform
+                                        f u 5
+                                        f r 35  # stand on button
 
-64
-f u 5
-
-85
-f u 5      # red is at middle -- jump
-f r 30
-
-100
-f r 16
-f u 5
-
-# fireboy has jumped over water at this point
-
-116
-f u 5
-f r 16
-
-# fireboy now on right ledge
-132
-f u 5
-f l 18
-
-# fireboy positioning for green
-150
-f l 20
-
-# fireboy jump over green
-170
-f u 5
-f l 30
-
-# fireboy jump onto lever raise
-200
-f u 5
-f l 35  # fireboy push lever
-
-# f jump over lever
-235
-f u 5
-f l 17
-
-# jump onto platform
-258
-f u 5
-f l 12
-
-# jump up off of platform
-270
-f u 5
-f r 34
-
-
-0
+# watergirl position in front of fire
 w r 60
-
-60
-w u 5
-w r 35
-
-95
-w u 5
-w r 25
-
-# watergirl jumping onto right ledge
-120
-w u 5
-w r 16
-
-# watergirl jumping off from ledge
-136
-w u 5
-w l 18
-
-# watergirl positioning in front of green
-154
-w l 20
-
-# w jumping over green
-174
-w u 5
-w l 30
-
-# w positioning
-194
-w l 20
