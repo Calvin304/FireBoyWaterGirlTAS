@@ -31,7 +31,15 @@ f r 85
                                             # wait on button
                                             s 72
                                                 # move off button
-                                                f r 100
+                                                f r 85  # position for jump
+                                                    # jump onto platform
+                                                    f u 5
+                                                    f r 10
+                                                        # wait a bit
+                                                        s 3
+                                                            # jump off platform
+                                                            f l 20
+                                                            f u 5
 
 # watergirl position in front of fire
 w r 55
@@ -73,3 +81,7 @@ w r 55
                                                         # jump off platform
                                                         w u 5
                                                         w l 24
+                                                            # wait on button for a bit
+                                                            s 29
+                                                                # move off button
+                                                                w l 30
