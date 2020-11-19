@@ -1,0 +1,10 @@
+# eat food
+f r 5
+f u 3
+    # jump the bump
+    f u 5
+    f r 2
+        s 4
+
+    w u 3
+        w l 5

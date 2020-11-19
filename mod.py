@@ -38,19 +38,41 @@ class TasLevelParser:
 
     def parse(self):
         with open(self.path, "r") as f:
-            cur_frame_index = 0
-            for line in f:
-                line = re.sub(r"#[^\n]*", "", line).strip()  # remove comments
-                if len(line) <= 0:
-                    continue
+            time_stack = [0]
+            last_indent_n = 0  # leading whitespace count for last line
+            cur_max_duration = -1
 
-                if line.isnumeric():
-                    cur_frame_index = int(line)
-                    self.get_frame(cur_frame_index)
+            for line in f:
+                line = re.sub(r"#[^\n]*", "", line).rstrip()  # remove comments
+                if len(line.strip()) <= 0:
+                    continue  # empty line so skip
+
+                stripped_line = line.lstrip()
+                indent_n = len(line) - len(stripped_line)
+
+                if indent_n != last_indent_n:
+                    if indent_n > last_indent_n:
+                        time_stack.append(time_stack[-1] + cur_max_duration)
+                    elif indent_n < last_indent_n:
+                        time_stack.pop()
+
+                    cur_max_duration = -1
+                    last_indent_n = indent_n
+
+                parts = re.split(r"\s+", stripped_line)
+                duration = int(parts[-1])
+
+                if len(parts) == 3:
+                    for i in range(duration):
+                        self.set_frame(time_stack[-1] + i, self.__PARSE_MAP[parts[0]][parts[1]])
                 else:
-                    parts = re.split(r"\s+", line)
-                    for i in range(int(parts[2])):
-                        self.set_frame(cur_frame_index + i, self.__PARSE_MAP[parts[0]][parts[1]])
+                    # sleep statement
+                    # just self.get_frame will suffice as this will fill sequence with no-ops up to index if required
+                    # (otherwise leave unchanged)
+                    self.get_frame(time_stack[-1] + duration - 1)
+
+                if duration > cur_max_duration:
+                    cur_max_duration = duration
 
     def to_asm(self):
         ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'
@@ -135,8 +157,12 @@ class SwfModder:
     def launch(self):
         subprocess.run(["flashplayer", self._output_swf_path])
 
-m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-m.disassemble()
-m.mod_inputs()
-m.reassemble()
-m.launch()
+# m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
+# m.disassemble()
+# m.mod_inputs()
+# m.reassemble()
+# m.launch()
+
+t = TasLevelParser("tas/test.txt")
+t.parse()
+print(t.sequence)
