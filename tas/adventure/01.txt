@@ -27,21 +27,49 @@ f r 85
                                     f l 10
                                         # jump off platform
                                         f u 5
-                                        f r 35  # stand on button
+                                        f r 31  # stand on button
+                                            # wait on button
+                                            s 72
+                                                # move off button
+                                                f r 100
 
 # watergirl position in front of fire
 w r 55
     # jump over fire
     w u 5
     w r 28
-        # walk through water for a bit (just enough to get diamond)
-        w r 12
-            # then jump
+        # walk through water
+        w r 29
+            # jump onto ledge
             w u 5
-            w r 24
-                # jump onto ledge
+            w r 19
+                # jump onto 2nd level
                 w u 5
-                w r 20
-                    # jump onto 2nd level
+                w l 27  # position in front of green
+                    # jump over green
                     w u 5
-                    w l 25
+                    w l 40  # position in front of ledge
+                        # jump over ledge
+                        w u 5
+                        w l 25  # position in front of lever
+                            # jump over lever
+                            w u 5
+                            w l 23  # position in front of platform
+                                # wait just a bit
+                                s 7
+                                    # jump onto platform
+                                    w u 5
+                                    w l 11
+                                        # jump off platform
+                                        w u 5
+                                        w r 90  #  walk straight over to right
+                                            # position for jumping onto platform
+                                            w r 18
+                                                # jump onto platform
+                                                w u 5
+                                                w r 14
+                                                    # gather momentum
+                                                    w l 4
+                                                        # jump off platform
+                                                        w u 5
+                                                        w l 24
