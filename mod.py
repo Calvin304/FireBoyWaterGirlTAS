@@ -74,8 +74,6 @@ class TasLevelParser:
 
                     cur_time += line_max_duration
 
-            print()
-
     def to_asm(self):
         ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'
         for frame in reversed(self.sequence):
@@ -159,12 +157,12 @@ class SwfModder:
     def launch(self):
         subprocess.run(["flashplayer", self._output_swf_path])
 
-# m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-# m.disassemble()
-# m.mod_inputs()
-# m.reassemble()
-# m.launch()
+m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
+m.disassemble()
+m.mod_inputs()
+m.reassemble()
+m.launch()
 
-t = TasLevelParser("tas/test.txt")
-t.parse()
-print(t.sequence)
+# t = TasLevelParser("tas/test.txt")
+# t.parse()
+# print(t.sequence)
