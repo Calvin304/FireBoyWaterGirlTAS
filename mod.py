@@ -166,6 +166,6 @@ m.mod_inputs()
 m.reassemble()
 m.launch()
 
-# t = TasLevelParser("tas/test.txt")
+# t = TasLevelParser("tas/adventure/01.txt")
 # t.parse()
 # print(t.sequence)
