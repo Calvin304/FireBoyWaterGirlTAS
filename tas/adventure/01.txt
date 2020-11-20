@@ -1,11 +1,20 @@
 # watergirl
+w u 5   # initial jump
 w r 42
     w u 5
     w r 20
         w u 5
-        w r 22
-            w r 18  # travel across water
+        w r 20
+            # walk into water
+            w r 22
+                # jump out water
                 w u 5
-                w r 20
+                w r 18
                     w u 5
-                    w l 20
+                    w l 30  # walk over to green
+                        # jump over green
+                        w u 5
+                        w l 23
+                            # jump onto ledge
+                            w u 5
+                            w l 20
