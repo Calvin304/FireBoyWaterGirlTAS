@@ -5,18 +5,22 @@ import subprocess
 import shutil
 
 class TasLevelParser:
-    __PARSE_MAP = {
-        "f": {
+    __PARSE_MAP = [
+        {
             "u": 0,
             "r": 1,
             "l": 2,
         },
-        "w": {
+        {
             "u": 3,
             "r": 4,
-            "l": 5
+            "l": 5,
         }
-    }
+    ]
+    __CHARACTER_PARSE_MAP = [
+        "fireboy:",
+        "watergirl:"
+    ]
     __NO_OP = [0, 0, 0, 0, 0, 0]
 
     def __init__(self, path):
@@ -38,44 +42,39 @@ class TasLevelParser:
 
     def parse(self):
         with open(self.path, "r") as f:
-            time_stack = [0]
-            last_indent_n = 0  # leading whitespace count for last line
-            cur_max_duration = -1
+            cur_time = 0
+
+            character_num = -1  # 0 for fireboy, 1 for watergirl
+            character_parse_list = self.__CHARACTER_PARSE_MAP.copy()
 
             for line in f:
-                line = re.sub(r"#[^\n]*", "", line).rstrip()  # remove comments
-                if len(line.strip()) <= 0:
+                line = re.sub(r"#[^\n]*", "", line).strip()  # remove comments
+                if len(line) <= 0:
                     continue  # empty line so skip
 
-                stripped_line = line.lstrip()
-                indent_n = len(line) - len(stripped_line)
-
-                if indent_n != last_indent_n:
-                    if indent_n > last_indent_n:
-                        push_val = time_stack[-1] + cur_max_duration
-                        while len(time_stack) - 1 < indent_n // 4:
-                            time_stack.append(push_val)
-                    elif indent_n < last_indent_n:
-                        while len(time_stack) - 1 > indent_n // 4:
-                            time_stack.pop()
-
-                    cur_max_duration = -1
-                    last_indent_n = indent_n
-
-                parts = re.split(r"\s+", stripped_line)
-                duration = int(parts[-1])
-
-                if len(parts) == 3:
-                    for i in range(duration):
-                        self.set_frame(time_stack[-1] + i, self.__PARSE_MAP[parts[0]][parts[1]])
+                if line in character_parse_list:
+                    cur_time = 0
+                    character_num = self.__CHARACTER_PARSE_MAP.index(line)
+                    character_parse_list.remove(line)
                 else:
-                    # sleep statement
-                    # just self.get_frame will suffice as this will fill sequence with no-ops up to index if required
-                    # (otherwise leave unchanged)
-                    self.get_frame(time_stack[-1] + duration - 1)
+                    line_max_duration = -1
+                    for part in line.split(","):
+                        command, duration = re.split(r"\s+", part.strip())
+                        duration = int(duration)
 
-                if duration > cur_max_duration:
-                    cur_max_duration = duration
+                        if command != "s":
+                            for i in range(duration):
+                                self.set_frame(cur_time + i, self.__PARSE_MAP[character_num][command])
+                        else:
+                            # sleep command
+                            self.get_frame(cur_time + duration - 1)
+
+                        if duration > line_max_duration:
+                            line_max_duration = duration
+
+                    cur_time += line_max_duration
+
+            print()
 
     def to_asm(self):
         ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'
@@ -160,12 +159,12 @@ class SwfModder:
     def launch(self):
         subprocess.run(["flashplayer", self._output_swf_path])
 
-m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-m.disassemble()
-m.mod_inputs()
-m.reassemble()
-m.launch()
+# m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
+# m.disassemble()
+# m.mod_inputs()
+# m.reassemble()
+# m.launch()
 
-# t = TasLevelParser("tas/adventure/01.txt")
-# t.parse()
-# print(t.sequence)
+t = TasLevelParser("tas/test.txt")
+t.parse()
+print(t.sequence)

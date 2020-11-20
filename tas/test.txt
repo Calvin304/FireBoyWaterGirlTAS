@@ -1,11 +1,9 @@
-# fireboy move to middle
-f r 5
-    # fireboy jump over water
-    f u 2
-    f r 4
-        # fireboy jump onto right ledge
-        f u 2
-        f r 3
+fireboy:
+l 3, u 5
+r 3
+s 4
+l 2
 
-# watergirl position in front of fire
-w r 10
+watergirl:
+l 5
+r 5

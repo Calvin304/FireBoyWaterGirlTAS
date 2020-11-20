@@ -1,134 +1,22 @@
-# fireboy move to middle
-f r 85
-    # fireboy jump over water
-    f u 5
-    f r 28
-        # fireboy jump onto right ledge
-        f u 5
-        f r 17
-            # f jump onto 2nd level
-            f u 5
-            f l 30  # position in front of green
-                # f jump over green
-                f u 5
-                f l 27
-                    # f jump over ledge
-                    f u 5
-                    f l 25
-                        # f walk up to and push lever
-                        f l 16
-                            # f jump over lever
-                            f u 5
-                            f l 20
-                                # wait for platform to come down
-                                s 4
-                                    # jump onto platform
-                                    f u 5
-                                    f l 10
-                                        # jump off platform
-                                        f u 5
-                                        f r 31  # stand on button
-                                            # wait on button
-                                            s 72
-                                                # move off button
-                                                f r 85  # position for jump
-                                                    # jump onto platform
-                                                    f u 5
-                                                    f r 10
-                                                        # wait a bit
-                                                        s 3
-                                                            # jump off platform
-                                                            f l 20
-                                                            f u 5
-                                                                # move off platform
-                                                                f l 13
-                                                                    # f jump
-                                                                    f u 5
-                                                                    f l 20
-                                                                        # f move left
-                                                                        f l 57
-                                                                            # f jump onto box
-                                                                            f u 5
-                                                                            f l 5
-                                                                                # wait to land on box
-                                                                                s 13
-                                                                                    # jump off box
-                                                                                    f u 5
-                                                                                    f l 20
-                                                                                        # wait for landing
-                                                                                        s 3
-                                                                                            # run up for jump
-                                                                                            f r 17
-                                                                                                # jump onto last platform
-                                                                                                f u 5
-                                                                                                f r 20
-                                                                                                    # move towards diamond
-                                                                                                    f r 49
-                                                                                                        # jump over
-                                                                                                        f u 5
-                                                                                                        f r 22
-                                                                                                            # enter goal
-                                                                                                            s 50
-
-# watergirl position in front of fire
-w r 55
-    # jump over fire
+# watergirl
+w u 5   # initial jump
+w r 41
     w u 5
-    w r 28
-        # walk through water
-        w r 29
-            # jump onto ledge
-            w u 5
-            w r 19
-                # jump onto 2nd level
-                w u 5
-                w l 27  # position in front of green
-                    # jump over green
-                    w u 5
-                    w l 40  # position in front of ledge
-                        # jump over ledge
-                        w u 5
-                        w l 25  # position in front of lever
-                            # jump over lever
-                            w u 5
-                            w l 23  # position in front of platform
-                                # wait just a bit
-                                s 7
-                                    # jump onto platform
-                                    w u 5
-                                    w l 11
-                                        # jump off platform
-                                        w u 5
-                                        w r 90  #  walk straight over to right
-                                            # position for jumping onto platform
-                                            w r 18
-                                                # jump onto platform
-                                                w u 5
-                                                w r 14
-                                                    # gather momentum
-                                                    w l 4
-                                                        # jump off platform
-                                                        w u 5
-                                                        w l 24
-                                                            # wait on button for a bit
-                                                            s 29
-                                                                # move off button
-                                                                w l 30
-                                                                    # move over to box
-                                                                    w l 96 # push over box
-                                                                        # jump onto box
-                                                                        w u 5
-                                                                        w l 10
-                                                                            # land on top of box
-                                                                            s 10
-                                                                                # jump onto ledge
-                                                                                w u 5
-                                                                                w l 19  # collect diamond
-                                                                                    # move right
-                                                                                    w r 20
-                                                                                        # jump onto ledge
-                                                                                        w u 5
-                                                                                        w r 70  # move towards slope
-                                                                                            # jump over slope
-                                                                                            w u 5
-                                                                                            w r 35  # move to exit
+    w r 20
+        w u 5
+        w r 20
+            # walk into water
+            w r 18
+                # jump out water (jump manoeuvre W01)
+                w u 16
+                w r 18
+                    w u 2
+                    w r 2
+                        w r 1
+                        w u 20
+                        w l 20
+                            # W01 finished, move towards green
+                            w l 10
+                                # jump over green
+                                w u 5
+                                w l 20
