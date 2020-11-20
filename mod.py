@@ -88,6 +88,7 @@ class TasLevelParser:
 class SwfModder:
     __PATH_TMP = "tmp"
     __PATH_TAS = "tas"
+    __LEVELS_MAP = ["adventure", "puzzle", "speed"]
 
     def __init__(self, swf_path, output_swf_path):
         self._swf_path = swf_path
@@ -146,16 +147,38 @@ class SwfModder:
         """
         Inject the TAS inputs into asasm
         """
-        ret = "getlocal0\n"
-        ret += 'findpropstrict QName(PackageNamespace(""), "Array")\n'
-        ret += 'pushnull\n'
+        levels = {}
+        for level_type in os.listdir(self.__PATH_TAS):
+            if os.path.isdir(os.path.join(self.__PATH_TAS, level_type)):
+                levels_inputs = []
 
-        t = TasLevelParser("tas/adventure/01.txt")
-        t.parse()
-        ret += t.to_asm()
+                for tas_file in sorted(os.listdir(os.path.join(self.__PATH_TAS, level_type)),
+                                       key=lambda x: int(os.path.splitext(x)[0])):
+                    level_index = int(os.path.splitext(tas_file)[0])
+                    tas_file_path = os.path.join(self.__PATH_TAS, level_type, tas_file)
 
-        ret += 'constructprop QName(PackageNamespace(""), "Array"), 2\n'
-        ret += 'setproperty QName(PackageInternalNs(""), "pzAdventureInputs")\n'
+                    for _ in range(level_index - len(levels_inputs)):
+                        levels_inputs.append(None)
+
+                    t = TasLevelParser(tas_file_path)
+                    t.parse()
+                    levels_inputs.append(t.to_asm())
+
+                levels[level_type] = levels_inputs
+
+        ret = ""
+        for level_type, levels_inputs in levels.items():
+            ret += "getlocal0\n"
+            ret += 'findpropstrict QName(PackageNamespace(""), "Array")\n'
+
+            for inputs in levels_inputs:
+                if inputs is None:
+                    ret += "pushnull\n"
+                else:
+                    ret += inputs
+
+            ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(levels_inputs)) + '\n'
+            ret += 'setproperty QName(PackageInternalNs(""), "pz' + level_type.title() + 'Inputs")\n'
 
         self._mod_file(os.path.join(self._abc_path, "level.class.asasm"), [
             ("pushdouble", "0.0384615384615385"),
@@ -210,8 +233,8 @@ class SwfModder:
         subprocess.run(["flashplayer", self._output_swf_path])
 
 m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-m.disassemble()
-m.mod_levels()
+# m.disassemble()
+# m.mod_levels()
 # m.mod_inputs()
 m.reassemble()
 m.launch()
