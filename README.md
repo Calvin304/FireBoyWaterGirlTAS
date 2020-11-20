@@ -10,3 +10,6 @@ This was easiest way I could find to reliably execute frame-perfect controls (es
 
 ## How to Run
 Since the TAS controls are injected directly into the .swf file, if all you want to do is _run_ the TAS, you just need to download [`fbwg-tas.swf`](fbwg-tas.swf) and play the file as you normally would.
+
+# Contributing
+Please take a look at the [Wiki](https://github.com/pixelzery/FireBoyWaterGirlTAS/wiki#contributing)
