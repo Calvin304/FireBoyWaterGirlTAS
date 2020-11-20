@@ -104,6 +104,10 @@ class SwfModder:
         subprocess.run(["abcexport", os.path.abspath(self._tmp_swf_path)])  # abcexport
         subprocess.run(["rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc"))])
 
+    def mod_all(self):
+        self.mod_levels()
+        self.mod_inputs()
+
     def _mod_file(self, file_path, start_lines, end_lines, replacement):
         """
         Internal method used for modding/patching asasm files
@@ -232,13 +236,13 @@ class SwfModder:
     def launch(self):
         subprocess.run(["flashplayer", self._output_swf_path])
 
-m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-# m.disassemble()
-# m.mod_levels()
-# m.mod_inputs()
-m.reassemble()
-m.launch()
+if __name__ == '__main__':
+    m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
+    m.disassemble()
+    m.mod_all()
+    m.reassemble()
+    m.launch()
 
-# t = TasLevelParser("tas/test.txt")
-# t.parse()
-# print(t.sequence)
+    # t = TasLevelParser("tas/test.txt")
+    # t.parse()
+    # print(t.sequence)
