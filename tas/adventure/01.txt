@@ -16,4 +16,7 @@ w r 41
                         w u 20
                         w l 20
                             # W01 finished, move towards green
-                            w l 20
+                            w l 10
+                                # jump over green
+                                w u 5
+                                w l 20
