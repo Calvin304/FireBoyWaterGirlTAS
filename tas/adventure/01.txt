@@ -8,3 +8,7 @@ u 2, r 2
 r 1, u 20, l 20
 l 10                # W01 finished, move towards green
 u 5, l 20           # jump over green
+
+fireboy:
+r 10
+l 10

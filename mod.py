@@ -103,6 +103,42 @@ class SwfModder:
         subprocess.run(["abcexport", os.path.abspath(self._tmp_swf_path)])  # abcexport
         subprocess.run(["rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc"))])
 
+    def _mod_file(self, file_path, start_lines, end_lines, replacement):
+        start_match_index = 0
+        end_match_index = 0
+
+        with open(file_path, "r") as f:
+            with open(file_path + ".mod", "w") as g:
+                ignoring = False
+                for line in f:
+                    if start_match_index == len(start_lines):
+                        g.write(replacement)
+                        start_match_index += 1
+                        ignoring = True
+                    if end_match_index >= len(end_lines):
+                        ignoring = False
+
+                    if len(line.strip()) > 0:
+                        if not ignoring:
+                            if start_match_index < len(start_lines):
+                                start, end = start_lines[start_match_index]
+                                if line.lstrip().startswith(start) and line.rstrip().endswith(end):
+                                    start_match_index += 1
+                                else:
+                                    start_match_index = 0
+                        else:
+                            if end_match_index < len(end_lines):
+                                start, end = end_lines[end_match_index]
+                                if line.lstrip().startswith(start) and line.rstrip().endswith(end):
+                                    end_match_index += 1
+                                else:
+                                    end_match_index = 0
+
+                    if not ignoring:
+                        g.write(line)
+
+        shutil.move(file_path + ".mod", file_path)  # replace file
+
     def mod_inputs(self):
         level_class_path = os.path.join(self._abc_path, "level.class.asasm")
         with open(level_class_path, "r") as f:
@@ -148,6 +184,35 @@ class SwfModder:
 
         shutil.move(level_class_path+".mod", level_class_path)  # replace file
 
+    def _get_levels_asm(self):
+        levels = []
+        with open(os.path.join("tas", "levels.txt"), "r") as f:
+            for line in f:
+                levels.append([int(x) for x in line.strip().split(",")])
+
+        ret = 'findpropstrict QName(PackageNamespace(""), "Array")\n'
+        for level in reversed(levels):
+            ret += 'findpropstrict QName(PackageNamespace(""), "Array")\n'
+            for val in level:
+                ret += "pushbyte " + str(val) + "\n"
+            ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(level)) + "\n"
+
+        ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(levels)) + "\n"
+        ret += 'setproperty QName(PackageInternalNs(""), "pzLevels")\n'
+        return ret
+
+    def mod_levels(self):
+        self._mod_file(os.path.join(self._abc_path, "Game.class.asasm"), [
+            ("getlocal0", ""),
+            ("pushscope", ""),
+            ("debug", '1, "_loc1_", 0, 118'),
+            ("getlocal0", "")
+        ], [
+            ('constructprop', 'QName(PackageNamespace(""), "Array"), 2'),
+            ('constructprop', 'QName(PackageNamespace(""), "Array"), 2'),
+            ('setproperty', 'QName(PackageInternalNs(""), "pzLevels")')
+        ], self._get_levels_asm())
+
     def reassemble(self):
         subprocess.run(["rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm"))])
         subprocess.run(["abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc"))])
@@ -158,10 +223,22 @@ class SwfModder:
         subprocess.run(["flashplayer", self._output_swf_path])
 
 m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
-m.disassemble()
-m.mod_inputs()
-m.reassemble()
-m.launch()
+# m.disassemble()
+
+m._mod_file("tmp/fbwg-base-0/Game.class.asasm", [
+    ("getlocal0", ""),
+    ("pushscope", ""),
+    ("debug", '1, "_loc1_", 0, 118'),
+    ("getlocal0", "")
+], [
+    ('constructprop', 'QName(PackageNamespace(""), "Array"), 2'),
+    ('constructprop', 'QName(PackageNamespace(""), "Array"), 2'),
+    ('setproperty', 'QName(PackageInternalNs(""), "pzLevels")')
+], "BRUH MOMENT")
+
+# m.mod_inputs()
+# m.reassemble()
+# m.launch()
 
 # t = TasLevelParser("tas/test.txt")
 # t.parse()
