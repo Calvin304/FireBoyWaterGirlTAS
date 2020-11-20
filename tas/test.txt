@@ -1,9 +1,0 @@
-fireboy:
-l 3, u 5
-r 3
-s 4
-l 2
-
-watergirl:
-l 5
-r 5
