@@ -3,7 +3,18 @@ import shutil
 import os
 import subprocess
 import time
+import hashlib
 from mod import SwfModder, TasLevelParser
+
+
+def hash_file(filename):
+    h = hashlib.sha256()
+    b = bytearray(128*1024)
+    mv = memoryview(b)
+    with open(filename, 'rb', buffering=0) as f:
+        for n in iter(lambda: f.readinto(mv), 0):
+            h.update(mv[:n])
+    return h.hexdigest()
 
 def compare(level_file, branches=None):
     if branches is None:
@@ -21,16 +32,17 @@ def compare(level_file, branches=None):
         # compute relative name (e.g: adventure/01)
         rel_name = os.path.splitext(rel_level_file)[0]
 
-        # parse branch files and get lengths
+        # process branch files
         branch_lengths = []
+        branch_hashes = []
         for branch in branches:
-            rel_branch_path = rel_name + branch + ".txt"
-            t = TasLevelParser(os.path.join("tas", rel_branch_path))
+            branch_path = os.path.join("tas", rel_name + branch + ".txt")
+            t = TasLevelParser(branch_path)
             t.parse()
             branch_lengths.append(len(t.sequence))
+            branch_hashes.append(hash_file(branch_path))
 
         rec_duration = min(branch_lengths) / 23  # in seconds (assume fps never dips below 23fps)
-        print(rec_duration)
 
         proc_rec = None
         proc_swf = None
@@ -50,6 +62,8 @@ def compare(level_file, branches=None):
             # second play button
             subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.55), shell=True)
             subprocess.run("xdotool click 1".format(window), shell=True)
+            # move cursor out of the way
+            subprocess.run("xdotool mousemove --window {} {} {}".format(window, width, height), shell=True)
             return window
 
 
@@ -68,9 +82,9 @@ def compare(level_file, branches=None):
             proc_swf.kill()
 
 
-        for branch in branches:
+        for i, branch in enumerate(branches):
             rel_branch_path = rel_name + branch + ".txt"
-            rec_video = os.path.join("rec", rel_name + branch + ".ogv")
+            rec_video = os.path.join("rec", rel_name + "-" + branch_hashes[i] + ".ogv")
             if not os.path.isfile(rec_video):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
