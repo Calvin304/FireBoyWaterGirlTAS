@@ -4,6 +4,7 @@ import os
 import subprocess
 import time
 import hashlib
+import cv2
 from mod import SwfModder, TasLevelParser
 
 
@@ -25,11 +26,30 @@ def combine(vid1, vid2):
         shutil.copy(vid1, path_a)
         shutil.copy(vid2, path_b)
 
-        subprocess.run(f'ffmpeg -y -i {path_a} -i {path_b} -filter_complex '
-                       f'"[1:v]format=rgba,colorchannelmixer=aa=0.65[bruh];[0:v][bruh]overlay" {path_out}', shell=True)
+        subprocess.run('ffmpeg -y -i {} -i {} -filter_complex '
+                       '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];[0:v][b]overlay" {}'
+                       .format(path_a, path_b, path_out), shell=True)
     finally:
         os.remove(path_a)
         os.remove(path_b)
+
+def find_vid_start(path):
+    tmp_dir = "vid_tmp"
+    os.makedirs(tmp_dir, exist_ok=True)
+    try:
+        # export all images
+        subprocess.run("ffmpeg -i '{}' -t 2 '{}'".format(path, os.path.join(tmp_dir, "%05d.png")), shell=True)
+
+        im_start = cv2.imread(os.path.join("tools", "start.png"))
+        for i, file in enumerate(sorted(os.listdir(tmp_dir))):
+            file_path = os.path.join(tmp_dir, file)
+            large_image = cv2.imread(file_path)
+            result = cv2.matchTemplate(im_start, large_image, cv2.TM_SQDIFF_NORMED)
+            mn, _, _, _ = cv2.minMaxLoc(result)
+            if mn < 0.05:
+                return i
+    finally:
+        shutil.rmtree(tmp_dir)
 
 def compare(level_file, branches=None):
     if branches is None:
@@ -122,4 +142,5 @@ def compare(level_file, branches=None):
 
 
 if __name__ == '__main__':
-    compare("tas/adventure/01.txt", ["a","b"])
+    # compare("tas/adventure/01.txt", ["a","b"])
+    print(find_vid_start("rec/adventure/b.ogv"))
