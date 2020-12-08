@@ -163,8 +163,9 @@ class SwfModder:
             if os.path.isdir(os.path.join(self.__PATH_TAS, level_type)):
                 levels_inputs = []
 
-                for tas_file in sorted(os.listdir(os.path.join(self.__PATH_TAS, level_type)),
-                                       key=lambda x: int(os.path.splitext(x)[0])):
+                for tas_file in sorted([x for x in os.listdir(os.path.join(self.__PATH_TAS, level_type))
+                                       if os.path.splitext(x)[0].isnumeric()],
+                                       key=lambda file: int(os.path.splitext(file)[0])):
                     level_index = int(os.path.splitext(tas_file)[0])
                     tas_file_path = os.path.join(self.__PATH_TAS, level_type, tas_file)
 
@@ -244,12 +245,8 @@ class SwfModder:
         self._run("flashplayer", os.path.abspath(self._output_swf_path))
 
 if __name__ == '__main__':
-    m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
+    m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
     m.disassemble()
     m.mod_all()
     m.reassemble()
     m.launch()
-
-    # t = TasLevelParser("tas/test.txt")
-    # t.parse()
-    # print(t.sequence)
