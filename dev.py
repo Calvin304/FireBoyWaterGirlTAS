@@ -45,6 +45,25 @@ def find_vid_start(path):
     finally:
         shutil.rmtree(tmp_dir)
 
+def click_swf():
+    output = subprocess.run("xdotool getwindowgeometry --shell "
+                            "`xdotool search --name 'Adobe Flash Player'`", shell=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    window_data = dict([item.split("=") for item in output.stdout.decode("utf8").splitlines()])
+    window = window_data["WINDOW"]
+    width = int(window_data.get("WIDTH", 929))
+    height = int(window_data.get("HEIGHT", 1010))
+
+    # first play button
+    subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.8), shell=True)
+    subprocess.run("xdotool click 1".format(window), shell=True)
+    # second play button
+    subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.55), shell=True)
+    subprocess.run("xdotool click 1".format(window), shell=True)
+    # move cursor out of the way
+    subprocess.run("xdotool mousemove --window {} {} {}".format(window, width, height), shell=True)
+    return window
+
 def compare(level_file, branches=None):
     if branches is None:
         # default argument
@@ -71,30 +90,10 @@ def compare(level_file, branches=None):
             branch_lengths.append(len(t.sequence))
             branch_hashes.append(hash_file(branch_path))
 
-        rec_duration = min(branch_lengths) / 23  # in seconds (assume fps never dips below 23fps)
+        rec_duration = min(branch_lengths) / 9  # in seconds (assume fps never dips below 9fps)
 
         proc_rec = None
         proc_swf = None
-
-        def click_swf():
-            output = subprocess.run("xdotool getwindowgeometry --shell "
-                                    "`xdotool search --name 'Adobe Flash Player'`", shell=True,
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            window_data = dict([item.split("=") for item in output.stdout.decode("utf8").splitlines()])
-            window = window_data["WINDOW"]
-            width = int(window_data.get("WIDTH", 929))
-            height = int(window_data.get("HEIGHT", 1010))
-
-            # first play button
-            subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.8), shell=True)
-            subprocess.run("xdotool click 1".format(window), shell=True)
-            # second play button
-            subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.55), shell=True)
-            subprocess.run("xdotool click 1".format(window), shell=True)
-            # move cursor out of the way
-            subprocess.run("xdotool mousemove --window {} {} {}".format(window, width, height), shell=True)
-            return window
-
 
         def rec_swf(duration, out_path):
             proc_swf = subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
@@ -119,7 +118,7 @@ def compare(level_file, branches=None):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
                 # mod
-                m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
+                m = SwfModder("fbwg-base-dev-slow.swf", "fbwg-tas.swf")
                 m.disassemble()
                 m.mod_all()
                 m.reassemble()
@@ -149,5 +148,5 @@ def compare(level_file, branches=None):
 
 
 if __name__ == '__main__':
-    compare("tas/adventure/01.txt", ["a","b"])
+    compare("tas/adventure/01.txt", ["a", "b"])
     subprocess.run("mpv 'rec/out.mkv'", shell=True)
