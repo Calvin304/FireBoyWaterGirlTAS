@@ -9,6 +9,13 @@ r 1, u 20, l 20
 l 10                # W01 finished, move towards green
 u 5, l 20           # jump over green
 
+# lever
+l 13
+u 5, l 25
+u 5, l 20
+s 10                # wait for platform to move down
+u 5, l 20
+
 fireboy:
 r 10
 l 10

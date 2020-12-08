@@ -244,7 +244,7 @@ class SwfModder:
         self._run("flashplayer", os.path.abspath(self._output_swf_path))
 
 if __name__ == '__main__':
-    m = SwfModder("fbwg-base.swf", "fbwg-tas.swf")
+    m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
     m.disassemble()
     m.mod_all()
     m.reassemble()
