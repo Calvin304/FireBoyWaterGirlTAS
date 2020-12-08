@@ -18,20 +18,14 @@ def hash_file(filename):
     return h.hexdigest()
 
 def combine(vid1, vid2):
-    path_a = os.path.join("rec", "a.ogv")
-    path_b = os.path.join("rec", "b.ogv")
     path_out = os.path.join("rec", "out.mkv")
+    offset = -5
 
-    try:
-        shutil.copy(vid1, path_a)
-        shutil.copy(vid2, path_b)
-
-        subprocess.run('ffmpeg -y -i {} -i {} -filter_complex '
-                       '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];[0:v][b]overlay" {}'
-                       .format(path_a, path_b, path_out), shell=True)
-    finally:
-        os.remove(path_a)
-        os.remove(path_b)
+    subprocess.run('ffmpeg -y -i {0} -i {2} -filter_complex '
+                   '"[1:v]trim=start_frame={1},format=rgba,colorchannelmixer=aa=0.65[b];'
+                   '[0:v]trim=start_frame={3}[a];[a][b]overlay" -c:v libx265 {4}'
+                   .format(vid1, find_vid_start(vid1) + offset, vid2, find_vid_start(vid2) + offset, path_out),
+                   shell=True)
 
 def find_vid_start(path):
     tmp_dir = "vid_tmp"
@@ -142,5 +136,5 @@ def compare(level_file, branches=None):
 
 
 if __name__ == '__main__':
-    # compare("tas/adventure/01.txt", ["a","b"])
-    print(find_vid_start("rec/adventure/b.ogv"))
+    compare("tas/adventure/01.txt", ["a","b"])
+    # print(find_vid_start("rec/adventure/01-250-638169b61664f9ae0fd0637d3b3ad06f8c6ccffb45961e333afd4a27fe492b80.ogv"))
