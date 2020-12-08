@@ -26,6 +26,34 @@ def combine(vid1, vid2):
                    '[0:v]trim=start_frame={3}[a];[a][b]overlay" -c:v libx265 {4}'
                    .format(vid1, find_vid_start(vid1) + offset, vid2, find_vid_start(vid2) + offset, path_out),
                    shell=True)
+    # im_start = cv2.imread(os.path.join("tools", "start.png"))
+    # for vid_no, vid in enumerate(vids):
+    #     tmp_dir = os.path.join("vid_tmp", str(vid_no))
+    #     os.makedirs(tmp_dir, exist_ok=True)
+    #
+    #     # export all images
+    #     subprocess.run("ffmpeg -i '{}' '{}'".format(vid, os.path.join(tmp_dir, "%05d.png")), shell=True)
+    #
+    #     # trim start (frame perfect) + rename
+    #     start_index = -1
+    #     for i, file in enumerate(sorted(os.listdir(tmp_dir))):
+    #         file_path = os.path.join(tmp_dir, file)
+    #
+    #         if file.startswith("-"):
+    #             # weird bug
+    #             os.remove(file_path)
+    #             continue
+    #
+    #         if start_index < 0:
+    #             large_image = cv2.imread(file_path)
+    #             result = cv2.matchTemplate(im_start, large_image, cv2.TM_SQDIFF_NORMED)
+    #             mn, _, _, _ = cv2.minMaxLoc(result)
+    #
+    #             if mn < 0.05:
+    #                 start_index = i
+    #                 print("start_index: ", start_index)
+    #         else:
+    #             shutil.move(file_path, os.path.join(tmp_dir, "{:05d}.png".format(i - start_index)))
 
 def find_vid_start(path):
     tmp_dir = "vid_tmp"
@@ -136,5 +164,7 @@ def compare(level_file, branches=None):
 
 
 if __name__ == '__main__':
+    # combine("rec/adventure/a.ogv", "rec/adventure/b.ogv")
     compare("tas/adventure/01.txt", ["a","b"])
+    subprocess.run("mpv 'rec/out.mkv'", shell=True)
     # print(find_vid_start("rec/adventure/01-250-638169b61664f9ae0fd0637d3b3ad06f8c6ccffb45961e333afd4a27fe492b80.ogv"))
