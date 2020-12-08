@@ -16,6 +16,21 @@ def hash_file(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
+def combine(vid1, vid2):
+    path_a = os.path.join("rec", "a.ogv")
+    path_b = os.path.join("rec", "b.ogv")
+    path_out = os.path.join("rec", "out.mkv")
+
+    try:
+        shutil.copy(vid1, path_a)
+        shutil.copy(vid2, path_b)
+
+        subprocess.run(f'ffmpeg -y -i {path_a} -i {path_b} -filter_complex '
+                       f'"[1:v]format=rgba,colorchannelmixer=aa=0.65[bruh];[0:v][bruh]overlay" {path_out}', shell=True)
+    finally:
+        os.remove(path_a)
+        os.remove(path_b)
+
 def compare(level_file, branches=None):
     if branches is None:
         # default argument
@@ -72,7 +87,6 @@ def compare(level_file, branches=None):
             time.sleep(0.5)  # wait for window to appear
             window_id = click_swf()
             time.sleep(0.7)
-            print("recording")
             proc_rec = subprocess.Popen("recordmydesktop --windowid '{}' "
                                         "--on-the-fly-encoding --no-sound -o '{}'".format(window_id, out_path), shell=True)
             # wait duration
@@ -82,9 +96,11 @@ def compare(level_file, branches=None):
             proc_swf.kill()
 
 
+        branch_rec_paths = []
         for i, branch in enumerate(branches):
             rel_branch_path = rel_name + branch + ".txt"
-            rec_video = os.path.join("rec", rel_name + "-" + branch_hashes[i] + ".ogv")
+            rec_video = os.path.join("rec", rel_name + "-" + str(min(branch_lengths)) + "-" + branch_hashes[i] + ".ogv")
+            branch_rec_paths.append(rec_video)
             if not os.path.isfile(rec_video):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
@@ -95,15 +111,15 @@ def compare(level_file, branches=None):
                 m.reassemble()
 
                 rec_swf(rec_duration, rec_video)
+
+        # combine videos
+        if len(branches) != 2:
+            raise ValueError
+        combine(*branch_rec_paths)
     finally:
         # restore level_file
         shutil.move(tmp_level_file, level_file)
 
 
 if __name__ == '__main__':
-    # m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
-    # m.disassemble()
-    # m.mod_all()
-    # m.reassemble()
-    # m.launch()
     compare("tas/adventure/01.txt", ["a","b"])
