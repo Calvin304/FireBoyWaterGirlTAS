@@ -3,9 +3,6 @@ from util import run
 import pyperclip as clip
 from mod import SwfModder
 
-path_rec = os.path.join("tas", "replay.txt")
-path_out = os.path.join("tas", "adventure", "01.txt")
-
 TRIM_END = True
 __FORMAT_MAP = ["u", "r", "l"]
 def format_frames(frames):
@@ -35,7 +32,7 @@ def format_frames(frames):
         ret += _format_frame(last_frame, hold_count)
     return ret
 
-def format_raw_replay():
+def format_raw_replay(path_rec, path_out):
     with open(path_rec, "r") as frec:
         f_frames = []
         w_frames = []
@@ -51,21 +48,35 @@ def format_raw_replay():
             fout.write("\nwatergirl: \n")
             fout.write(format_frames(w_frames))
 
-def mod_and_launch():
-    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
-    m.disassemble()
-    m.mod_all()
-    m.reassemble()
-    m.launch()
-
-def record_replay():
-    mod_and_launch()
+def record_replay(m):
+    proc = m.launch_async()
+    input("Press enter when done recording...")
     print(clip.paste())
+    proc.kill()
+
+def auto_workflow():
+    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+    while True:
+        format_raw_replay()
+        m.disassemble()
+        m.mod_all()
+        m.reassemble()
+
+        print("Recording")
+        record_replay(m)
+
+        print("Replaying")
+        m.disassemble()
+        m.mod_all()
+        m.reassemble()
+        proc = m.launch_async()
+        input("Press enter when done watching...")
+        proc.kill()
+
+        input("Press enter to go again...")
 
 if __name__ == '__main__':
-    while True:
-        print("Recording")
-        record_replay()
-        print("Replaying")
-        format_raw_replay()
-        input("Press enter to go again...")
+    # auto_workflow()
+
+    format_raw_replay(os.path.join("tas", "replay.txt"),
+                      os.path.join("tas", "adventure", "01.txt"))

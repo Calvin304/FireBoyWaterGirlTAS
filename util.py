@@ -30,3 +30,6 @@ def click_swf():
 
 def run(tool_name, *args):
     return subprocess.run([os.path.join(__PATH_TOOLS, tool_name) if is_windows() else tool_name, *args])
+
+def run_async(tool_name, *args):
+    return subprocess.Popen([os.path.join(__PATH_TOOLS, tool_name) if is_windows() else tool_name, *args])

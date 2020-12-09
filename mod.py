@@ -3,7 +3,7 @@ import os
 import re
 import subprocess
 import shutil
-from util import run, click_swf
+from util import run, run_async, click_swf
 
 class TasLevelParser:
     __PARSE_MAP = [
@@ -265,6 +265,16 @@ class SwfModder:
             proc.wait()
         else:
             return run("flashplayer", os.path.abspath(self._output_swf_path))
+
+    def launch_async(self):
+        if os.name == "posix":
+            import time
+            proc = subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
+            time.sleep(0.5)
+            click_swf()
+            return proc
+        else:
+            return run_async("flashplayer", os.path.abspath(self._output_swf_path))
 
 if __name__ == '__main__':
     m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
