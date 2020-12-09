@@ -90,7 +90,7 @@ def compare(level_file, branches=None):
             branch_lengths.append(len(t.sequence))
             branch_hashes.append(hash_file(branch_path))
 
-        rec_duration = min(branch_lengths) / 9  # in seconds (assume fps never dips below 9fps)
+        rec_duration = min(branch_lengths) / 23  # in seconds (assume fps never dips below 23fps)
 
         proc_rec = None
         proc_swf = None
@@ -118,7 +118,7 @@ def compare(level_file, branches=None):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
                 # mod
-                m = SwfModder("fbwg-base-dev-slow.swf", "fbwg-tas.swf")
+                m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
                 m.disassemble()
                 m.mod_all()
                 m.reassemble()
