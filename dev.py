@@ -18,14 +18,36 @@ def hash_file(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
-def combine(vid1, vid2):
+def combine_old(vid1, vid2, vid1_start=None, vid2_start=None, preview=False):
     path_out = os.path.join("rec", "out.mkv")
     offset = -5
 
-    subprocess.run('ffmpeg -y -i {0} -i {2} -filter_complex '
-                   '"[1:v]trim=start_frame={1},format=rgba,colorchannelmixer=aa=0.65[b];'
-                   '[0:v]trim=start_frame={3}[a];[a][b]overlay" -c:v libx265 {4}'
-                   .format(vid1, find_vid_start(vid1) + offset, vid2, find_vid_start(vid2) + offset, path_out),
+    if vid1_start is None:
+        vid1_start = find_vid_start(vid1)
+    if vid2_start is None:
+        vid2_start = find_vid_start(vid2)
+
+    preview_part = "-t 3" if preview else ""
+    subprocess.run(('ffmpeg -y -i {0} '+ preview_part +' -i {2} ' + preview_part + ' -filter_complex '
+                   '"[1:v]trim=start_frame={3},format=rgba,colorchannelmixer=aa=0.65[b];'
+                    + '[0:v]trim=start_frame={1}[a];[a][b]overlay" -c:v libx265 {4}')
+                   .format(vid1, vid1_start + offset, vid2, vid2_start + offset, path_out),
+                   shell=True)
+
+def combine(vid1, vid2, vid1_off, vid2_off, preview=False):
+    path_out = os.path.join("rec", "out.mkv")
+    path_a = os.path.join("rec", "a.mkv")
+    path_b = os.path.join("rec", "b.mkv")
+
+
+    subprocess.run("ffmpeg -y -i {} -ss {} -c:v libx265 {}".format(vid1, vid1_off, path_a), shell=True)
+    subprocess.run("ffmpeg -y -i {} -ss {} -c:v libx265 {}".format(vid2, vid2_off, path_b), shell=True)
+
+
+    subprocess.run(('ffmpeg -y -i {0} -i {1} -filter_complex '
+                   '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];'
+                    + '[0:v][a];[a][b]overlay" -c:v libx265 {2}')
+                   .format(path_a, path_b, path_out),
                    shell=True)
 
 def find_vid_start(path):
@@ -33,7 +55,7 @@ def find_vid_start(path):
     os.makedirs(tmp_dir, exist_ok=True)
     try:
         # export all images
-        subprocess.run("ffmpeg -i '{}' -t 2 '{}'".format(path, os.path.join(tmp_dir, "%05d.png")), shell=True)
+        subprocess.run("ffmpeg -i '{}' -t 5 '{}'".format(path, os.path.join(tmp_dir, "%05d.png")), shell=True)
 
         im_start = cv2.imread(os.path.join("tools", "start.png"))
         for i, file in enumerate(sorted(os.listdir(tmp_dir))):
@@ -46,7 +68,7 @@ def find_vid_start(path):
     finally:
         shutil.rmtree(tmp_dir)
 
-def compare(level_file, branches=None):
+def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview=False):
     if branches is None:
         # default argument
         branches = ["a", "b"]
@@ -100,7 +122,7 @@ def compare(level_file, branches=None):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
                 # mod
-                m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+                m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
                 m.disassemble()
                 m.mod_all()
                 m.reassemble()
@@ -119,8 +141,8 @@ def compare(level_file, branches=None):
         except:
             pass
 
-        if combination_hash != existing_combination_hash:
-            combine(*branch_rec_paths)
+        if (combination_hash != existing_combination_hash) or (vid1_start is not None and vid2_start is not None) or preview:
+            combine(*branch_rec_paths, vid1_start, vid2_start, preview)
 
         with open(os.path.join("rec", "combination.txt"), 'w') as f:
             f.write(combination_hash)
@@ -130,5 +152,5 @@ def compare(level_file, branches=None):
 
 
 if __name__ == '__main__':
-    compare("tas/adventure/01.txt", ["a", "b"])
+    compare("tas/adventure/01.txt", ["a", "b"], 0.5, 0.5)
     subprocess.run("mpv 'rec/out.mkv'", shell=True)
