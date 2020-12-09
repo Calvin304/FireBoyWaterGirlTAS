@@ -1,10 +1,9 @@
 import os
 
-path_rec = os.path.join("rec", "rec.txt")
+path_rec = os.path.join("tas", "replay.txt")
 path_out = os.path.join("tas", "adventure", "01.txt")
 
 __FORMAT_MAP = ["u", "r", "l"]
-
 def format_frames(frames):
     def _format_frame(frame, hold):
         out_inputs = []
