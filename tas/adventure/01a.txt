@@ -3,7 +3,7 @@ u 5, r 41           # initial jump + move to right
 u 5, r 20
 u 5, r 20
 r 18                # walk into water
-u 16, r 18          # jump out water (jump manoeuvre W01)
+u 16, r 18          # jump out water (jump manoeuvre)
 u 2, r 2
 r 1, u 20, l 20
 l 10                # W01 finished, move towards green
@@ -14,9 +14,18 @@ u 5, l 20
 s 10                # wait for platform to move down
 u 5, l 12
 u 5, r 35
+r 70                # move towards purple platform
+r 10
+u 5, r 10
+u 3, r 1, l 1
+u 5, l 20
+l 5                 # move onto purple button
+s 35
+l 10
+u 5, l 30           # jump up slope
 
 fireboy:
-r 89
+r 90
 u 8, r 8
 r 16
 u 9, r 9
@@ -26,6 +35,16 @@ l 12
 u 16, l 16
 l 17
 u 11, l 11
-l 15
-u 4, l 4
+l 18
+u 8, l 8
 l 12
+u 5, l 7
+u 6, l 6
+u 3, r 1, l 1
+u 3, r 30
+s 67
+r 80
+u 5, r 15
+u 5, l 30
+l 5
+u 5, l 30           # jump up slope
