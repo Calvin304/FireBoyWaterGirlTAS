@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import shutil
+from util import click_swf
 
 def is_windows():
     return os.name == 'nt'
@@ -249,14 +250,13 @@ class SwfModder:
     def launch(self):
         self._run("flashplayer", os.path.abspath(self._output_swf_path))
 
-m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
+m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
 m.disassemble()
 m.mod_all()
 m.reassemble()
 
 try:
     import time
-    from dev import click_swf
     subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
     time.sleep(0.5)
     click_swf()

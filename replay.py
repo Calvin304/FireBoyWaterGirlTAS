@@ -45,6 +45,3 @@ if __name__ == '__main__':
 
             fout.write("\nwatergirl: \n")
             fout.write(format_frames(w_frames))
-
-    # mod file
-    import mod

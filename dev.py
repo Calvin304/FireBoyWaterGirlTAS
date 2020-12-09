@@ -6,6 +6,7 @@ import time
 import hashlib
 import cv2
 from mod import SwfModder, TasLevelParser
+from util import click_swf
 
 
 def hash_file(filename):
@@ -44,25 +45,6 @@ def find_vid_start(path):
                 return i
     finally:
         shutil.rmtree(tmp_dir)
-
-def click_swf():
-    output = subprocess.run("xdotool getwindowgeometry --shell "
-                            "`xdotool search --name 'Adobe Flash Player'`", shell=True,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    window_data = dict([item.split("=") for item in output.stdout.decode("utf8").splitlines()])
-    window = window_data["WINDOW"]
-    width = int(window_data.get("WIDTH", 929))
-    height = int(window_data.get("HEIGHT", 1010))
-
-    # first play button
-    subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.8), shell=True)
-    subprocess.run("xdotool click 1".format(window), shell=True)
-    # second play button
-    subprocess.run("xdotool mousemove --window {} {} {}".format(window, width * 0.5, height * 0.55), shell=True)
-    subprocess.run("xdotool click 1".format(window), shell=True)
-    # move cursor out of the way
-    subprocess.run("xdotool mousemove --window {} {} {}".format(window, width, height), shell=True)
-    return window
 
 def compare(level_file, branches=None):
     if branches is None:
@@ -118,7 +100,7 @@ def compare(level_file, branches=None):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
                 # mod
-                m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
+                m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
                 m.disassemble()
                 m.mod_all()
                 m.reassemble()
