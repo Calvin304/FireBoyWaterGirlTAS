@@ -148,6 +148,10 @@ class SwfModder:
                     if not ignoring:
                         g.write(line)
 
+                if ignoring:
+                    # if still ignoring, could not find end lines
+                    raise RuntimeError("Could not find end lines")
+
         shutil.move(file_path + ".mod", file_path)  # replace file
 
     def _parse_tas_levels(self):
@@ -191,16 +195,28 @@ class SwfModder:
             ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(parsed_levels)) + '\n'
             ret += 'setproperty QName(PackageInternalNs(""), "pz' + level_type.title() + 'Inputs")\n'
 
-        self._mod_file(os.path.join(self._abc_path, "level.class.asasm"), [
-            ("pushdouble", "0.0384615384615385"),
-            ("convert_d", ""),
-            ("setproperty", 'QName(PackageNamespace(""), "m_timeStep")'),
-        ], [
-            ("constructprop", 'QName(PackageNamespace(""), "Array"), 23'),
-            ("constructprop", 'QName(PackageNamespace(""), "Array"), 2'),
-            ("setproperty", 'QName(PackageInternalNs(""), "pzPuzzleInputs")')
+        try:
+            self._mod_file(os.path.join(self._abc_path, "level.class.asasm"), [
+                ("pushdouble", "0.0384615384615385"),
+                ("convert_d", ""),
+                ("setproperty", 'QName(PackageNamespace(""), "m_timeStep")'),
+            ], [
+                ("constructprop", 'QName(PackageNamespace(""), "Array"), 23'),
+                ("constructprop", 'QName(PackageNamespace(""), "Array"), 2'),
+                ("setproperty", 'QName(PackageInternalNs(""), "pzPuzzleInputs")')
 
-        ], ret)
+            ], ret)
+        except RuntimeError:
+            self._mod_file(os.path.join(self._abc_path, "level.class.asasm"), [
+                ("pushdouble", "0.0384615384615385"),
+                ("convert_d", ""),
+                ("setproperty", 'QName(PackageNamespace(""), "m_timeStep")'),
+            ], [
+               ("constructprop", 'QName(PackageNamespace(""), "Array"), 0'),
+               ("constructprop", 'QName(PackageNamespace(""), "Array"), 2'),
+               ("setproperty", 'QName(PackageInternalNs(""), "pzPuzzleInputs")')
+
+           ], ret)
 
     def _get_levels_asm(self):
         levels = []
