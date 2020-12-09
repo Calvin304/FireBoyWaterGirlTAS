@@ -82,13 +82,16 @@ def auto_workflow():
 
 def workflow_record():
     m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
-    format_raw_replay()
     m.disassemble()
     m.mod_all()
     m.reassemble()
 
-    print("Recording")
-    record_replay(m)
+    m.launch()
+
+    format_raw_replay()
+    m.disassemble()
+    m.mod_all()
+    m.reassemble()
 
 if __name__ == '__main__':
     # auto_workflow()

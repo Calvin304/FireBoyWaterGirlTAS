@@ -1,5 +1,19 @@
 fireboy: 
-r 20
+r 22
 
 watergirl: 
-u 20, r 20
+u 22, r 22
+r 32
+u 23, r 23
+r 33
+u 16, r 16
+r 3
+u 1, r 1
+u 1, r 1, l 1
+u 15, l 15
+l 11
+u 18, l 18
+l 21
+u 7, l 7
+l 21
+u 3, l 3
