@@ -40,13 +40,13 @@ def combine(vid1, vid2, vid1_off, vid2_off, preview=False):
     path_b = os.path.join("rec", "b.mkv")
 
 
-    subprocess.run("ffmpeg -y -i {} -ss {} -c:v libx265 {}".format(vid1, vid1_off, path_a), shell=True)
-    subprocess.run("ffmpeg -y -i {} -ss {} -c:v libx265 {}".format(vid2, vid2_off, path_b), shell=True)
+    preview_part = " -t 2 " if preview else ""
+    subprocess.run(("ffmpeg -y -i {} -ss {} " + preview_part + "-c:v libx265 {}").format(vid1, vid1_off, path_a), shell=True)
+    subprocess.run(("ffmpeg -y -i {} -ss {} " + preview_part + "-c:v libx265 {}").format(vid2, vid2_off, path_b), shell=True)
 
 
-    subprocess.run(('ffmpeg -y -i {0} -i {1} -filter_complex '
-                   '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];'
-                    + '[0:v][a];[a][b]overlay" -c:v libx265 {2}')
+    subprocess.run('ffmpeg -y -i {0} -i {1} -filter_complex '
+                   '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];[0:v][b]overlay" -c:v libx265 {2}'
                    .format(path_a, path_b, path_out),
                    shell=True)
 
@@ -152,5 +152,5 @@ def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview
 
 
 if __name__ == '__main__':
-    compare("tas/adventure/01.txt", ["a", "b"], 0.5, 0.5)
+    compare("tas/adventure/01.txt", ["a", "b"], 1, 1.15, preview=False)
     subprocess.run("mpv 'rec/out.mkv'", shell=True)
