@@ -102,6 +102,8 @@ class SwfModder:
         self._tmp_swf_path = os.path.join(self.__PATH_TMP, self._swf_name + ".swf")
         self._abc_path = os.path.join(self.__PATH_TMP, self._swf_name + "-0")
 
+        self._parsed_tas_levels = {}
+
     def _run(self, tool_name, *args):
         subprocess.run([os.path.join(self.__PATH_TOOLS, tool_name) if is_windows() else tool_name, *args])
 
@@ -154,42 +156,45 @@ class SwfModder:
 
         shutil.move(file_path + ".mod", file_path)  # replace file
 
-    def mod_inputs(self):
-        """
-        Inject the TAS inputs into asasm
-        """
+    def _parse_tas_levels(self):
         levels = {}
         for level_type in os.listdir(self.__PATH_TAS):
             if os.path.isdir(os.path.join(self.__PATH_TAS, level_type)):
-                levels_inputs = []
+                parsed_levels = []
 
                 for tas_file in sorted([x for x in os.listdir(os.path.join(self.__PATH_TAS, level_type))
-                                       if os.path.splitext(x)[0].isnumeric()],
+                                        if os.path.splitext(x)[0].isnumeric()],
                                        key=lambda file: int(os.path.splitext(file)[0])):
                     level_index = int(os.path.splitext(tas_file)[0])
                     tas_file_path = os.path.join(self.__PATH_TAS, level_type, tas_file)
 
-                    for _ in range(level_index - len(levels_inputs)):
-                        levels_inputs.append(None)
+                    for _ in range(level_index - len(parsed_levels)):
+                        parsed_levels.append(None)
 
                     t = TasLevelParser(tas_file_path)
                     t.parse()
-                    levels_inputs.append(t.to_asm())
+                    parsed_levels.append(t)
 
-                levels[level_type] = levels_inputs
+                levels[level_type] = parsed_levels
+        self._parsed_tas_levels = levels
 
+    def mod_inputs(self):
+        """
+        Inject the TAS inputs into asasm
+        """
+        self._parse_tas_levels()
         ret = ""
-        for level_type, levels_inputs in levels.items():
+        for level_type, parsed_levels in self._parsed_tas_levels.items():
             ret += "getlocal0\n"
             ret += 'findpropstrict QName(PackageNamespace(""), "Array")\n'
 
-            for inputs in levels_inputs:
-                if inputs is None:
+            for tas_level in parsed_levels:
+                if tas_level is None:
                     ret += "pushnull\n"
                 else:
-                    ret += inputs
+                    ret += tas_level.to_asm()
 
-            ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(levels_inputs)) + '\n'
+            ret += 'constructprop QName(PackageNamespace(""), "Array"), ' + str(len(parsed_levels)) + '\n'
             ret += 'setproperty QName(PackageInternalNs(""), "pz' + level_type.title() + 'Inputs")\n'
 
         self._mod_file(os.path.join(self._abc_path, "level.class.asasm"), [
