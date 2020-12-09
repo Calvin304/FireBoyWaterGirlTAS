@@ -3,10 +3,7 @@ import os
 import re
 import subprocess
 import shutil
-from util import click_swf
-
-def is_windows():
-    return os.name == 'nt'
+from util import run, click_swf
 
 class TasLevelParser:
     __PARSE_MAP = [
@@ -92,7 +89,6 @@ class TasLevelParser:
 class SwfModder:
     __PATH_TMP = "tmp"
     __PATH_TAS = "tas"
-    __PATH_TOOLS = "tools"
     __LEVELS_MAP = ["adventure", "puzzle", "speed"]
 
     def __init__(self, swf_path, output_swf_path):
@@ -105,14 +101,11 @@ class SwfModder:
 
         self._parsed_tas_levels = {}
 
-    def _run(self, tool_name, *args):
-        subprocess.run([os.path.join(self.__PATH_TOOLS, tool_name) if is_windows() else tool_name, *args])
-
     def disassemble(self):
         os.makedirs(self.__PATH_TMP, exist_ok=True)  # make tmp dir
         shutil.copy(self._swf_path, self._tmp_swf_path)  # copy base swf
-        self._run("abcexport", os.path.abspath(self._tmp_swf_path))  # abcexport
-        self._run("rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc")))
+        run("abcexport", os.path.abspath(self._tmp_swf_path))  # abcexport
+        run("rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc")))
 
     def mod_all(self):
         self.mod_levels()
@@ -242,23 +235,24 @@ class SwfModder:
         ], self._get_levels_asm())
 
     def reassemble(self):
-        self._run("rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm")))
-        self._run("abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc")))
+        run("rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm")))
+        run("abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc")))
         shutil.move(self._tmp_swf_path, self._output_swf_path)
         shutil.rmtree(self.__PATH_TMP)
 
     def launch(self):
-        self._run("flashplayer", os.path.abspath(self._output_swf_path))
+        if os.name == "posix":
+            import time
+            proc = subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
+            time.sleep(0.5)
+            click_swf()
+            proc.wait()
+        else:
+            return run("flashplayer", os.path.abspath(self._output_swf_path))
 
-m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
-m.disassemble()
-m.mod_all()
-m.reassemble()
-
-try:
-    import time
-    subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
-    time.sleep(0.5)
-    click_swf()
-except:
+if __name__ == '__main__':
+    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+    m.disassemble()
+    m.mod_all()
+    m.reassemble()
     m.launch()

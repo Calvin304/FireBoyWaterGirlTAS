@@ -1,8 +1,12 @@
 import os
+from util import run
+import pyperclip as clip
+from mod import SwfModder
 
 path_rec = os.path.join("tas", "replay.txt")
 path_out = os.path.join("tas", "adventure", "01.txt")
 
+TRIM_END = True
 __FORMAT_MAP = ["u", "r", "l"]
 def format_frames(frames):
     def _format_frame(frame, hold):
@@ -27,10 +31,11 @@ def format_frames(frames):
             last_frame = frame
             hold_count = 0
     # flush remaining
-    ret += _format_frame(last_frame, hold_count)
+    if not(TRIM_END and all([x is False for x in last_frame])):
+        ret += _format_frame(last_frame, hold_count)
     return ret
 
-if __name__ == '__main__':
+def format_raw_replay():
     with open(path_rec, "r") as frec:
         f_frames = []
         w_frames = []
@@ -45,3 +50,22 @@ if __name__ == '__main__':
 
             fout.write("\nwatergirl: \n")
             fout.write(format_frames(w_frames))
+
+def mod_and_launch():
+    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+    m.disassemble()
+    m.mod_all()
+    m.reassemble()
+    m.launch()
+
+def record_replay():
+    mod_and_launch()
+    print(clip.paste())
+
+if __name__ == '__main__':
+    while True:
+        print("Recording")
+        record_replay()
+        print("Replaying")
+        format_raw_replay()
+        input("Press enter to go again...")

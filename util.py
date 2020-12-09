@@ -1,6 +1,15 @@
+import os
 import subprocess
 
+__PATH_TOOLS = "tools"
+
+def is_windows():
+    return os.name == 'nt'
+
 def click_swf():
+    if not os.name == "posix":
+        raise RuntimeError("click_swf is only available on Linux atm")
+
     output = subprocess.run("xdotool getwindowgeometry --shell "
                             "`xdotool search --name 'Adobe Flash Player'`", shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -18,3 +27,6 @@ def click_swf():
     # move cursor out of the way
     subprocess.run("xdotool mousemove --window {} {} {}".format(window, width, height), shell=True)
     return window
+
+def run(tool_name, *args):
+    return subprocess.run([os.path.join(__PATH_TOOLS, tool_name) if is_windows() else tool_name, *args])
