@@ -1,9 +1,5 @@
 fireboy: 
-s 12
-r 5
+r 20
 
 watergirl: 
-s 12
-l 1
-r 2, l 2
-u 1, r 1, l 1
+u 20, r 20

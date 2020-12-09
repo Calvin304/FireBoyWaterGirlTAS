@@ -51,11 +51,13 @@ def format_raw_replay():
             fout.write("\nwatergirl: \n")
             fout.write(format_frames(w_frames))
 
-def record_replay(m):
+def record_replay(m, wait=False):
     proc = m.launch_async()
-    input("Press enter when done recording...")
-    print(clip.paste())
-    proc.kill()
+
+    if wait:
+        input("Press enter when done recording...")
+        print(clip.paste())
+        proc.kill()
 
 def auto_workflow():
     m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
@@ -78,6 +80,17 @@ def auto_workflow():
 
         input("Press enter to go again...")
 
+def workflow_record():
+    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+    format_raw_replay()
+    m.disassemble()
+    m.mod_all()
+    m.reassemble()
+
+    print("Recording")
+    record_replay(m)
+
 if __name__ == '__main__':
     # auto_workflow()
-    format_raw_replay()
+    workflow_record()
+    # format_raw_replay()
