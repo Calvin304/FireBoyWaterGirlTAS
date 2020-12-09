@@ -3,6 +3,9 @@ from util import run
 import pyperclip as clip
 from mod import SwfModder
 
+path_rec = os.path.join("tas", "replay.txt")
+path_out = os.path.join("tas", "adventure", "01.txt")
+
 TRIM_END = True
 __FORMAT_MAP = ["u", "r", "l"]
 def format_frames(frames):
@@ -32,7 +35,7 @@ def format_frames(frames):
         ret += _format_frame(last_frame, hold_count)
     return ret
 
-def format_raw_replay(path_rec, path_out):
+def format_raw_replay():
     with open(path_rec, "r") as frec:
         f_frames = []
         w_frames = []
@@ -77,6 +80,4 @@ def auto_workflow():
 
 if __name__ == '__main__':
     # auto_workflow()
-
-    format_raw_replay(os.path.join("tas", "replay.txt"),
-                      os.path.join("tas", "adventure", "01.txt"))
+    format_raw_replay()
