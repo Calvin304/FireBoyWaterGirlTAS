@@ -1,4 +1,23 @@
 #!/bin/sh
+# This script records the Adobe Flash Player window in a frame-synchronised fashion.
+# fbwg-base-dev-clip.swf must be used for this to work -- that swf file has been modded
+# so that the clipboard is updated with the current frame number for every frame that is run.
+
+# The key benefit of recording in this way is that it tries to stabilise the time-differences in
+# adjacent frames of the resulting videos, which is introduced due to the game running at a variable fps.
+# (NB: the fps seems to fluctuate particularly greatly for the initial second or so of each level)
+
+# This allows for better direct comparison between recordings of different runs as it
+# reduces the likelihood that the recordings will fall out of sync with each other.
+
+# When dealing with time improvements in the order of fractions of seconds, the stability
+# of the game is insufficient for the direct comparison of unsynchronised screen recordings.
+
+# Technical details:
+# xwd is used to quickly dump screen data many times per second while recording
+# frames are then duplicated as necessary to stabilise fps
+# then the frames are stiched together into a video file using Ffmpeg
+
 wid=`xdotool search --name 'Adobe Flash Player'`
 if ! [[ $wid =~ ^[0-9]+$ ]] ; then
    echo "error: Could not locate window id" >&2; exit 1
