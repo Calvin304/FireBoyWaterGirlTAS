@@ -122,7 +122,7 @@ def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
                 # mod
-                m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
+                m = SwfModder(os.path.join("swf", "fbwg-base-dev.swf"), os.path.join("swf", "fbwg-tas.swf"))
                 m.disassemble()
                 m.mod_all()
                 m.reassemble()

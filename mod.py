@@ -259,7 +259,7 @@ class SwfModder:
     def launch(self):
         if os.name == "posix":
             import time
-            proc = subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
+            proc = subprocess.Popen("flashplayer '" + os.path.abspath(self._output_swf_path) + "'", shell=True)
             time.sleep(0.5)
             click_swf()
             proc.wait()
@@ -269,7 +269,7 @@ class SwfModder:
     def launch_async(self):
         if os.name == "posix":
             import time
-            proc = subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
+            proc = subprocess.Popen("flashplayer '" + os.path.abspath(self._output_swf_path) + "'", shell=True)
             time.sleep(0.5)
             click_swf()
             return proc
@@ -277,7 +277,7 @@ class SwfModder:
             return run_async("flashplayer", os.path.abspath(self._output_swf_path))
 
 if __name__ == '__main__':
-    m = SwfModder("fbwg-base-dev.swf", "fbwg-tas.swf")
+    m = SwfModder(os.path.join("swf", "fbwg-base-dev-clip.swf"), os.path.join("swf", "fbwg-tas.swf"))
     m.disassemble()
     m.mod_all()
     m.reassemble()

@@ -60,7 +60,7 @@ def record_replay(m, wait=False):
         proc.kill()
 
 def auto_workflow():
-    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+    m = SwfModder(os.path.join("swf", "fbwg-replay.swf"), os.path.join("swf", "fbwg-tas.swf"))
     while True:
         format_raw_replay()
         m.disassemble()
@@ -81,7 +81,7 @@ def auto_workflow():
         input("Press enter to go again...")
 
 def workflow_record():
-    m = SwfModder("fbwg-replay.swf", "fbwg-tas.swf")
+    m = SwfModder(os.path.join("swf", "fbwg-replay.swf"), os.path.join("swf", "fbwg-tas.swf"))
     m.disassemble()
     m.mod_all()
     m.reassemble()
