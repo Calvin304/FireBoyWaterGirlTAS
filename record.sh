@@ -76,6 +76,6 @@ render(){
 
   exit 255
 }
-trap 'render' EXIT
+trap 'render' SIGINT
 
 record

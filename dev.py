@@ -2,12 +2,12 @@
 import shutil
 import os
 import subprocess
+import signal
 import time
 import hashlib
 import cv2
 from mod import SwfModder, TasLevelParser
 from util import click_swf
-
 
 def hash_file(filename):
     h = hashlib.sha256()
@@ -18,36 +18,14 @@ def hash_file(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
-def combine_old(vid1, vid2, vid1_start=None, vid2_start=None, preview=False):
+def combine(vid1, vid2, preview=False):
     path_out = os.path.join("rec", "out.mkv")
-    offset = -5
-
-    if vid1_start is None:
-        vid1_start = find_vid_start(vid1)
-    if vid2_start is None:
-        vid2_start = find_vid_start(vid2)
 
     preview_part = "-t 3" if preview else ""
-    subprocess.run(('ffmpeg -y -i {0} '+ preview_part +' -i {2} ' + preview_part + ' -filter_complex '
-                   '"[1:v]trim=start_frame={3},format=rgba,colorchannelmixer=aa=0.65[b];'
-                    + '[0:v]trim=start_frame={1}[a];[a][b]overlay" -c:v libx265 {4}')
-                   .format(vid1, vid1_start + offset, vid2, vid2_start + offset, path_out),
-                   shell=True)
-
-def combine(vid1, vid2, vid1_off, vid2_off, preview=False):
-    path_out = os.path.join("rec", "out.mkv")
-    path_a = os.path.join("rec", "a.mkv")
-    path_b = os.path.join("rec", "b.mkv")
-
-
-    preview_part = " -t 2 " if preview else ""
-    subprocess.run(("ffmpeg -y -i {} -ss {} " + preview_part + "-c:v libx265 {}").format(vid1, vid1_off, path_a), shell=True)
-    subprocess.run(("ffmpeg -y -i {} -ss {} " + preview_part + "-c:v libx265 {}").format(vid2, vid2_off, path_b), shell=True)
-
-
-    subprocess.run('ffmpeg -y -i {0} -i {1} -filter_complex '
-                   '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];[0:v][b]overlay" -c:v libx265 {2}'
-                   .format(path_a, path_b, path_out),
+    subprocess.run(('ffmpeg -y -i {0} '+ preview_part +' -i {1} ' + preview_part + ' -filter_complex '
+                   '"[1:v]format=rgba,colorchannelmixer=aa=0.65[b];'
+                    + '[0:v][b]overlay,pad=ceil(iw/2)*2:ceil(ih/2)*2" -c:v libx265 {2}')
+                   .format(vid1, vid2, path_out),
                    shell=True)
 
 def find_vid_start(path):
@@ -68,7 +46,7 @@ def find_vid_start(path):
     finally:
         shutil.rmtree(tmp_dir)
 
-def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview=False):
+def compare(level_file, branches=None, preview=False):
     if branches is None:
         # default argument
         branches = ["a", "b"]
@@ -96,38 +74,46 @@ def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview
 
         rec_duration = min(branch_lengths) / 23  # in seconds (assume fps never dips below 23fps)
 
-        proc_rec = None
-        proc_swf = None
-
-        def rec_swf(duration, out_path):
-            proc_swf = subprocess.Popen("flashplayer 'fbwg-tas.swf'", shell=True)
+        def rec_swf(swf_file, duration, out_path):
+            proc_swf = subprocess.Popen("flashplayer '" + swf_file + "'", shell=True)
             time.sleep(0.5)  # wait for window to appear
             window_id = click_swf()
-            time.sleep(0.7)
-            proc_rec = subprocess.Popen("recordmydesktop --windowid '{}' "
-                                        "--on-the-fly-encoding --no-sound -o '{}'".format(window_id, out_path), shell=True)
-            # wait duration
-            time.sleep(duration + 1)
+            # time.sleep(0.7)
 
-            proc_rec.kill()
-            proc_swf.kill()
+            rec_tmp_dir = "rec_tmp"
+            os.makedirs(rec_tmp_dir, exist_ok=True)
+            try:
+                proc_rec = subprocess.Popen("sh record.sh", shell=True)
+                # wait duration
+                time.sleep(duration + 2)
+
+                proc_rec.send_signal(signal.SIGINT)
+                proc_swf.kill()
+
+                proc_rec.wait()
+            finally:
+                output_video = os.path.join(rec_tmp_dir, "out.mkv")
+                if not os.path.isfile(output_video):
+                    raise FileNotFoundError("Record script did not produce video")
+                shutil.move(output_video, out_path)
+                shutil.rmtree(rec_tmp_dir)
 
 
         branch_rec_paths = []
         for i, branch in enumerate(branches):
             rel_branch_path = rel_name + branch + ".txt"
-            rec_video = os.path.join("rec", rel_name + "-" + str(min(branch_lengths)) + "-" + branch_hashes[i] + ".ogv")
+            rec_video = os.path.join("rec", rel_name + "-" + str(min(branch_lengths)) + "-" + branch_hashes[i] + ".mkv")
             branch_rec_paths.append(rec_video)
             if not os.path.isfile(rec_video):
                 shutil.copy(os.path.join("tas", rel_branch_path), level_file)
 
                 # mod
-                m = SwfModder(os.path.join("swf", "fbwg-base-dev.swf"), os.path.join("swf", "fbwg-tas.swf"))
+                m = SwfModder(os.path.join("swf", "fbwg-base-dev-clip.swf"), os.path.join("swf", "fbwg-tas.swf"))
                 m.disassemble()
                 m.mod_all()
                 m.reassemble()
 
-                rec_swf(rec_duration, rec_video)
+                rec_swf(m._output_swf_path, rec_duration, rec_video)
 
         # combine videos
         if len(branches) != 2:
@@ -141,8 +127,8 @@ def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview
         except:
             pass
 
-        if (combination_hash != existing_combination_hash) or (vid1_start is not None and vid2_start is not None) or preview:
-            combine(*branch_rec_paths, vid1_start, vid2_start, preview)
+        if preview or (combination_hash != existing_combination_hash):
+            combine(*branch_rec_paths, preview)
 
         with open(os.path.join("rec", "combination.txt"), 'w') as f:
             f.write(combination_hash)
@@ -152,5 +138,5 @@ def compare(level_file, branches=None, vid1_start=None, vid2_start=None, preview
 
 
 if __name__ == '__main__':
-    compare("tas/adventure/01.txt", ["a", "b"], 1, 1.15, preview=False)
-    subprocess.run("mpv 'rec/out.mkv'", shell=True)
+    compare("tas/adventure/01.txt", ["a", "b"])
+    # subprocess.run("mpv 'rec/out.mkv'", shell=True)

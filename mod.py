@@ -95,7 +95,7 @@ class SwfModder:
         self._swf_path = swf_path
         self._output_swf_path = output_swf_path
 
-        self._swf_name = os.path.splitext(self._swf_path)[0]
+        self._swf_name = os.path.splitext(os.path.basename(self._swf_path))[0]
         self._tmp_swf_path = os.path.join(self.__PATH_TMP, self._swf_name + ".swf")
         self._abc_path = os.path.join(self.__PATH_TMP, self._swf_name + "-0")
 
@@ -277,7 +277,7 @@ class SwfModder:
             return run_async("flashplayer", os.path.abspath(self._output_swf_path))
 
 if __name__ == '__main__':
-    m = SwfModder(os.path.join("swf", "fbwg-base-dev-clip.swf"), os.path.join("swf", "fbwg-tas.swf"))
+    m = SwfModder(os.path.join("swf", "fbwg-base-dev.swf"), os.path.join("swf", "fbwg-tas.swf"))
     m.disassemble()
     m.mod_all()
     m.reassemble()
