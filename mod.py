@@ -104,8 +104,8 @@ class SwfModder:
     def disassemble(self):
         os.makedirs(self.__PATH_TMP, exist_ok=True)  # make tmp dir
         shutil.copy(self._swf_path, self._tmp_swf_path)  # copy base swf
-        run("abcexport", os.path.abspath(self._tmp_swf_path))  # abcexport
-        run("rabcdasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc")))
+        run(os.path.join("RABCDAsm","abcexport"), os.path.abspath(self._tmp_swf_path))  # abcexport
+        run(os.path.join("RABCDAsm","rabcdasm"), os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0.abc")))
 
     def mod_all(self):
         self.mod_levels()
@@ -251,8 +251,8 @@ class SwfModder:
         ], self._get_levels_asm())
 
     def reassemble(self):
-        run("rabcasm", os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm")))
-        run("abcreplace", os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc")))
+        run(os.path.join("RABCDAsm","rabcasm"), os.path.abspath(os.path.join(self.__PATH_TMP, self._swf_name + "-0", self._swf_name + "-0.main.asasm")))
+        run(os.path.join("RABCDAsm","abcreplace"), os.path.abspath(self._tmp_swf_path), "0", os.path.abspath(os.path.join(self._abc_path, self._swf_name + "-0.main.abc")))
         shutil.move(self._tmp_swf_path, self._output_swf_path)
         shutil.rmtree(self.__PATH_TMP)
 

@@ -10,22 +10,24 @@ l 10                # W01 finished, move towards green
 u 5, l 20           # jump over green
 l 13
 u 5, l 26           # jump over ramp # NB: l 25 still valid
-u 5, l 20
-s 10                # wait for platform to move down
-u 5, l 12
-u 5, r 35
+u 5, l 21
+s 7                # wait for platform to move down
+u 5, l 13
+u 2, l 2
+r 34
 r 70                # move towards purple platform
 r 10
 u 5, r 10
 u 3, r 1, l 1
 u 5, l 20
 l 5                 # move onto purple button
-s 35
+s 26
 l 10
 u 5, l 30           # jump up slope
 
 fireboy:
-r 90
+r 41
+u 2, r 40
 u 8, r 8
 r 16
 u 9, r 9
@@ -40,11 +42,13 @@ u 8, l 8
 l 12
 u 5, l 7
 u 6, l 6
-u 3, r 1, l 1
-u 3, r 30
-s 67
+u 2, r 1, l 1
+s 1
+u 3, r 34
+s 71                #wait on button
 r 80
-u 5, r 15
-u 5, l 30
-l 5
+u 5, r 13
+s 2
+u 5, l 29
+l 2
 u 5, l 30           # jump up slope
